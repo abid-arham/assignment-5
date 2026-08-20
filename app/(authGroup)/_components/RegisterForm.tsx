@@ -1,4 +1,6 @@
-import React from "react"
+"use client"
+
+import React, { useActionState, useEffect } from "react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -13,6 +15,8 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import Link from "next/link"
+import { registerAction } from "../_actions/authActions"
+import { toast } from "sonner"
 
 const ROLES = [
   {
@@ -23,9 +27,21 @@ const ROLES = [
   },
 ]
 
-export default function RegisterCard() {
+const RegisterForm = ()=> {
+  const [state, action, pending] = useActionState(registerAction, {
+    success: false,
+    message: "",
+  });
+
+  useEffect(() => {
+    if (state.message && !state.success) {
+      toast.error(state.message);
+    }
+  }, [state]);
+
   return (
-    <div className="min-h-screen flex items-center justify-center">
+    <div>
+      <form action={action}>
       <Card className="w-full max-w-sm">
         <CardHeader>
           <CardTitle>Create your account</CardTitle>
@@ -40,7 +56,6 @@ export default function RegisterCard() {
         </CardHeader>
 
         <CardContent>
-          <form>
             <div className="flex flex-col gap-6">
 
               {/* Name */}
@@ -48,6 +63,7 @@ export default function RegisterCard() {
                 <Label htmlFor="name">Name</Label>
                 <Input
                   id="name"
+                  name="name"
                   type="text"
                   placeholder="John Doe"
                   required
@@ -59,6 +75,7 @@ export default function RegisterCard() {
                 <Label htmlFor="email">Email</Label>
                 <Input
                   id="email"
+                  name="email"
                   type="email"
                   placeholder="m@example.com"
                   required
@@ -92,23 +109,26 @@ export default function RegisterCard() {
                 <Label htmlFor="password">Password</Label>
                 <Input
                   id="password"
+                  name="password"
                   type="password"
                   required
                 />
               </div>
 
             </div>
-          </form>
         </CardContent>
 
         <CardFooter className="flex-col gap-2">
-          <Button type="submit" className="w-full">
-            Register
+          <Button type="submit" className="w-full" disabled={pending}>
+            {pending ? "Creating account..." : "Register"}
           </Button>
 
-       
+
         </CardFooter>
       </Card>
+      </form>
     </div>
   )
 }
+
+export default RegisterForm
