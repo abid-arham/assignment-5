@@ -1,8 +1,9 @@
 import Link from 'next/link'
-import { ArrowRight, ChevronDown, LogOut, Wrench } from 'lucide-react'
+import { ArrowRight, ChevronDown, LogOut, User, Wrench } from 'lucide-react'
 import { cookies } from 'next/headers'
 import { logoutAction } from '@/app/(authGroup)/_actions/authActions'
 import { MobileMenu } from './mobile-menu'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu'
 
 const links = [
   { label: 'Find a service', href: '/services' },
@@ -42,12 +43,27 @@ export async function Navbar() {
 
         <div className="hidden items-center gap-3 md:flex">
           {isLoggedIn ? (
-            <form action={logoutAction}>
-              <button className="group inline-flex items-center gap-2 rounded-full bg-destructive px-5 py-2.5 text-sm font-semibold text-destructive-foreground shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
-                Log out
-                <LogOut className="size-3.5" aria-hidden="true" />
-              </button>
-            </form>
+            <DropdownMenu>
+              <DropdownMenuTrigger className="flex size-9 items-center justify-center rounded-full bg-secondary text-foreground transition-colors hover:bg-secondary/80">
+                <User className="size-4" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem asChild>
+                  <Link href="/profile" className="flex items-center gap-2">
+                    <User className="size-4" />
+                    Profile
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <form action={logoutAction} className="w-full">
+                    <button className="flex w-full items-center gap-2 text-destructive">
+                      <LogOut className="size-4" />
+                      Log out
+                    </button>
+                  </form>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           ) : (
             <>
               <Link href="/login" className="rounded-full px-4 py-2 text-sm font-semibold text-foreground transition-colors hover:bg-secondary">

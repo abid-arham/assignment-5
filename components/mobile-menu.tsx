@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
-import { ArrowRight, LogOut, Menu, X } from 'lucide-react'
+import { ArrowRight, LogOut, Menu, User, X } from 'lucide-react'
 import { logoutAction } from '@/app/(authGroup)/_actions/authActions'
 
 const links = [
@@ -41,12 +41,18 @@ export function MobileMenu({ isLoggedIn }: { isLoggedIn: boolean }) {
             ))}
             <div className="mt-3 border-t border-border/70 pt-4">
               {isLoggedIn ? (
-                <form action={logoutAction}>
-                  <button className="w-full inline-flex items-center justify-center gap-2 rounded-full bg-destructive px-5 py-2.5 text-sm font-semibold text-destructive-foreground">
-                    Log out
-                    <LogOut className="size-3.5" aria-hidden="true" />
-                  </button>
-                </form>
+                <div className="flex flex-col gap-2">
+                  <Link href="/profile" onClick={() => setIsOpen(false)} className="w-full inline-flex items-center justify-center gap-2 rounded-full border border-border px-5 py-2.5 text-sm font-semibold text-foreground">
+                    <User className="size-3.5" aria-hidden="true" />
+                    Profile
+                  </Link>
+                  <form action={logoutAction}>
+                    <button className="w-full inline-flex items-center justify-center gap-2 rounded-full bg-destructive px-5 py-2.5 text-sm font-semibold text-destructive-foreground">
+                      <LogOut className="size-3.5" aria-hidden="true" />
+                      Log out
+                    </button>
+                  </form>
+                </div>
               ) : (
                 <div className="grid grid-cols-2 gap-3">
                   <Link href="/login" onClick={() => setIsOpen(false)} className="rounded-full border border-border px-4 py-2.5 text-center text-sm font-semibold text-foreground">
