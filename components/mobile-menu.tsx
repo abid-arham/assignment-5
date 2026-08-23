@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
-import { ArrowRight, LogOut, Menu, User, X } from 'lucide-react'
+import { ArrowRight, LayoutDashboard, LogOut, Menu, User, X } from 'lucide-react'
 import { logoutAction } from '@/app/(authGroup)/_actions/authActions'
 
 const links = [
@@ -11,7 +11,13 @@ const links = [
   { label: 'For technicians', href: '/auth/register?role=technician' },
 ]
 
-export function MobileMenu({ isLoggedIn }: { isLoggedIn: boolean }) {
+export function MobileMenu({
+  isLoggedIn,
+  dashboardHref,
+}: {
+  isLoggedIn: boolean
+  dashboardHref?: string | null
+}) {
   const [isOpen, setIsOpen] = useState(false)
 
   return (
@@ -42,7 +48,17 @@ export function MobileMenu({ isLoggedIn }: { isLoggedIn: boolean }) {
             <div className="mt-3 border-t border-border/70 pt-4">
               {isLoggedIn ? (
                 <div className="flex flex-col gap-2">
-                  <Link href="/profile" onClick={() => setIsOpen(false)} className="w-full inline-flex items-center justify-center gap-2 rounded-full border border-border px-5 py-2.5 text-sm font-semibold text-foreground">
+                  {dashboardHref && (
+                    <Link
+                      href={dashboardHref}
+                      onClick={() => setIsOpen(false)}
+                      className="w-full inline-flex items-center justify-center gap-2 rounded-full border border-border px-5 py-2.5 text-sm font-semibold text-foreground"
+                    >
+                      <LayoutDashboard className="size-3.5" aria-hidden="true" />
+                      Dashboard
+                    </Link>
+                  )}
+                  <Link href="/me" onClick={() => setIsOpen(false)} className="w-full inline-flex items-center justify-center gap-2 rounded-full border border-border px-5 py-2.5 text-sm font-semibold text-foreground">
                     <User className="size-3.5" aria-hidden="true" />
                     Profile
                   </Link>

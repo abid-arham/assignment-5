@@ -13,7 +13,7 @@ function formatRating(rating: string) {
 }
 
 export const metadata = {
-  title: 'Technicians | AutoCare',
+  title: 'Technicians | FixItNow',
   description: 'Browse available technicians and their expertise.',
 }
 
@@ -56,6 +56,7 @@ export default async function TechniciansPage() {
                       <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-primary">
                         Technician
                       </span>
+                      <h2>{tech.user.name}</h2>
                       <span className="text-xl font-semibold text-foreground">
                         {formatRate(tech.hourlyRate)}
                       </span>

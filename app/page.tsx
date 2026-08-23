@@ -104,7 +104,7 @@ export default function Page() {
       </section>
 
       <section className="mx-auto max-w-7xl px-5 py-20 sm:px-8 lg:px-10">
-        <div className="flex items-end justify-between gap-4"><div><p className="text-sm font-semibold text-muted-foreground">Meet the community</p><h2 className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">People you can count on.</h2></div><Link href="/services" className="hidden items-center gap-1 text-sm font-semibold sm:flex">Meet all pros <ChevronRight className="size-4" aria-hidden="true" /></Link></div>
+        <div className="flex items-end justify-between gap-4"><div><p className="text-sm font-semibold text-muted-foreground">Meet the community</p><h2 className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">People you can count on.</h2></div><Link href="/technicians" className="hidden items-center gap-1 text-sm font-semibold sm:flex">Meet all pros <ChevronRight className="size-4" aria-hidden="true" /></Link></div>
         <div className="mt-8 grid gap-4 md:grid-cols-3">{technicians.map((tech) => <article key={tech.name} className="flex items-center gap-4 rounded-2xl border border-border bg-card p-5"><div className={`flex size-14 shrink-0 items-center justify-center rounded-full text-sm font-bold ${tech.tone}`}>{tech.initials}</div><div className="min-w-0"><h3 className="font-semibold">{tech.name}</h3><p className="mt-1 text-sm text-muted-foreground">{tech.trade}</p><div className="mt-2 flex items-center gap-2 text-xs"><span className="inline-flex items-center gap-1 font-semibold"><Star className="size-3.5 fill-primary text-primary" aria-hidden="true" /> {tech.rating}</span><span className="text-muted-foreground">· {tech.jobs}</span></div></div></article>)}</div>
       </section>
 

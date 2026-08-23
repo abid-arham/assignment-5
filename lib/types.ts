@@ -52,5 +52,39 @@ export type ITechnicianProfile = {
   reviewCount: number;
   createdAt: string;
   updatedAt: string;
-  reviews: unknown[]; // type this properly once you know the review shape
+  reviews: unknown[];
+  user: {
+    id: string;
+    name: string;
+    email: string;
+  };
 }
+
+export type IBookingFormInput = {
+  technicianId: string;
+  serviceId: string;
+  scheduledAt: string;
+  location: string;
+  notes?:string;
+  totalAmount: number;
+}
+
+export type IBooking = {
+  id: string;
+  customerId: string;
+  technicianId: string;
+  serviceId: string;
+  scheduledAt: string;
+  location: string;
+  notes: string | null;
+  totalAmount: string; 
+  status: string; 
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type IBookingStatus = 
+  "ACCEPTED"|
+  "DECLINE"|
+  "IN_PROGRESS"|
+  "COMPLETE"

@@ -1,18 +1,38 @@
 import Link from 'next/link'
-import { ArrowRight, ChevronDown, LogOut, User, Wrench } from 'lucide-react'
+import { ArrowRight, ChevronDown, LayoutDashboard, LogOut, User, Wrench } from 'lucide-react'
 import { cookies } from 'next/headers'
 import { logoutAction } from '@/app/(authGroup)/_actions/authActions'
 import { MobileMenu } from './mobile-menu'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu'
-
+import jwt, { JwtPayload } from "jsonwebtoken"
 const links = [
   { label: 'Find a service', href: '/services' },
   { label: 'How it works', href: '#how-it-works' },
   { label: 'For technicians', href: '/auth/register?role=technician' },
 ]
 
+const DASHBOARD_BY_ROLE: Record<string, string> = {
+  CUSTOMER: '/dashboard',
+  ADMIN: '/admin-dashboard',
+  TECHNICIAN: '/technician-dashboard'
+}
+
 export async function Navbar() {
+  const accessToken = (await cookies()).get('accessToken')?.value
+
+  let role:string | null = null
+  if(accessToken){
+    try {
+      const decodedToken = jwt.verify(accessToken, process.env.JWT_ACCESS_SECRET!) as JwtPayload
+      role = (decodedToken.role as string)
+    } catch (error) {
+
+      role = null
+      
+    }
+  }
   const isLoggedIn = !!(await cookies()).get('accessToken')?.value
+    const dashboardHref = role ? DASHBOARD_BY_ROLE[role] : null
 
   return (
     <header className="sticky top-0 z-50 border-b border-border/70 bg-background/95 backdrop-blur-md">
@@ -43,28 +63,39 @@ export async function Navbar() {
 
         <div className="hidden items-center gap-3 md:flex">
           {isLoggedIn ? (
-            <DropdownMenu>
-              <DropdownMenuTrigger className="flex size-9 items-center justify-center rounded-full bg-secondary text-foreground transition-colors hover:bg-secondary/80">
-                <User className="size-4" />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem asChild>
-                  <Link href="/profile" className="flex items-center gap-2">
-                    <User className="size-4" />
-                    Profile
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <form action={logoutAction} className="w-full">
-                    <button className="flex w-full items-center gap-2 text-destructive">
-                      <LogOut className="size-4" />
-                      Log out
-                    </button>
-                  </form>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          ) : (
+            <>
+              {dashboardHref && (
+                <Link
+                  href={dashboardHref}
+                  className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold text-foreground transition-colors hover:bg-secondary"
+                >
+                  <LayoutDashboard className="size-4" aria-hidden="true" />
+                  Dashboard
+                </Link>
+              )}
+              <DropdownMenu>
+                <DropdownMenuTrigger className="flex size-9 items-center justify-center rounded-full bg-secondary text-foreground transition-colors hover:bg-secondary/80">
+                  <User className="size-4" />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem asChild>
+                    <Link href="/me" className="flex items-center gap-2">
+                      <User className="size-4" />
+                      Profile
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <form action={logoutAction} className="w-full">
+                      <button className="flex w-full items-center gap-2 text-destructive">
+                        <LogOut className="size-4" />
+                        Log out
+                      </button>
+                    </form>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </>
+          ): (
             <>
               <Link href="/login" className="rounded-full px-4 py-2 text-sm font-semibold text-foreground transition-colors hover:bg-secondary">
                 Sign in
