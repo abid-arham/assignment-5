@@ -25,7 +25,7 @@ type ApiOptions = RequestInit & {
  */
 export async function api<T>(path: string, options: ApiOptions = {}): Promise<ApiResult<T>> {
   const { auth, headers, ...init } = options;
-
+  
   const authHeader: HeadersInit = {};
   if (auth) {
     const accessToken = (await cookies()).get("accessToken")?.value;
@@ -48,7 +48,7 @@ export async function api<T>(path: string, options: ApiOptions = {}): Promise<Ap
       
       return { ok: false, message: body.message || "Something went wrong" };
     }
-    console.log("RAW BODY:", JSON.stringify(body));
+    //console.log("RAW BODY:", JSON.stringify(body));
     return { ok: true, data: body.data };
   } catch {
     // Network error / invalid JSON - the API is unreachable, not just unhappy

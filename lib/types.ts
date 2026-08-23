@@ -36,22 +36,21 @@ export type IService = {
 }
 
 
-
 export type ITechnicianProfile = {
   id: string;
   userId: string;
-  bio: string;
+  bio: string | null;
   skills: string[];
   experience: number;
   hourlyRate: string;
-  location: string;
-  availability:{
-    days: string[],
-    hours: string
-  }
+  location: string | null;
+  availability: {
+    days: string[];
+    hours: string;
+  } | null;
   averageRating: string;
   reviewCount: number;
   createdAt: string;
   updatedAt: string;
-
+  reviews: unknown[]; // type this properly once you know the review shape
 }

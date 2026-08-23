@@ -8,7 +8,7 @@ function formatPrice(price: string) {
 }
 
 export const metadata = {
-  title: 'Services | AutoCare',
+  title: 'Services | FixItNow',
   description: 'Browse available automotive services and pricing.',
 }
 
