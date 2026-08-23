@@ -5,7 +5,7 @@ import Navbar from '@/components/navbar'
 export default function NotFound() {
   return (
     <main className="min-h-screen bg-background text-foreground">
-      <Navbar />
+      
       <section className="mx-auto flex max-w-7xl flex-col items-center px-5 pb-20 pt-16 text-center sm:px-8 sm:pt-24 lg:pb-28">
         <div className="relative flex size-40 items-center justify-center sm:size-52" aria-hidden="true">
           <div className="absolute inset-0 rounded-[2.5rem] border border-border bg-secondary/70 rotate-6" />
@@ -18,9 +18,8 @@ export default function NotFound() {
         </div>
 
         <p className="mt-12 text-sm font-semibold uppercase tracking-[0.2em] text-muted-foreground">Wrong turn</p>
-        <h1 className="mt-4 max-w-2xl text-balance font-sans text-4xl font-bold tracking-tight sm:text-6xl">
-          This page needs a professional.
-        </h1>
+        
+        
         <p className="mt-5 max-w-lg text-pretty text-base leading-7 text-muted-foreground sm:text-lg">
           We couldn&apos;t find the address you entered. Let&apos;s get you back to the right place.
         </p>

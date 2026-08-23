@@ -1,33 +1,34 @@
-"use server"
+// "use server"
 
+import { api } from "@/lib/api"
+import { IUser } from "@/lib/types"
 import { cookies } from "next/headers"
+import jwt from "jsonwebtoken"
 
-export const getMe = async()=>{
-    const cookieStore = await cookies()
 
-    const accessToken = cookieStore.get("accessToken")?.value
-    
-    if(!accessToken){
-        // throw new Error("User not logged in")
-        return{
-            success: false,
-            message: "User Not logged in"
-        }
-    }
 
-    const res = await fetch(`${process.env.BACKEND_API_URL}/api/users/me`, {
+
+export const getMe = async():Promise<IUser | null> =>{
+
+    const token =  (await cookies()).get("accessToken")?.value as string
+
+    //console.log(token, "TOKEN")
+
+    if(!token) return null
+
+    const res = await api("/api/auth/me",{
+        cache:"no-store",
         headers:{
-            Authorization: `${accessToken}`
-        },
-        cache: "force-cache",
-        next:{
-            revalidate: 60*60*24,
-            tags:["my-profile"]
+            Authorization : `Bearer ${token}`
         }
     })
 
-    const result = res.json()
-    
+    //console.log(res, "RES")
 
-    return result
+    //if(!res.ok) return null
+    //console.log(jwt.decode(token))
+
+
+    return jwt.decode(token) as IUser
+
 }

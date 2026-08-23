@@ -1,8 +1,11 @@
+import { getMe } from '@/service/getMe'
 import React from 'react'
 
-const TechnicianDashboard = () => {
+const TechnicianDashboard = async() => {
+
+
   return (
-    <div>TechnicianDashboard</div>
+    <div>Technician Dashboard</div>
   )
 }
 
