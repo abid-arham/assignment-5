@@ -7,15 +7,6 @@ export type IUser = {
   role: IRole;
 };
 
-export type ICar = {
-  id: string;
-  brand: string;
-  model: string;
-  dailyRate: number;
-  location: string;
-  isAvailable: boolean;
-  ownerId: string;
-};
 
 export type ITokenPayload = {
   id: string;
@@ -29,3 +20,38 @@ export type ILoginState = {
   success: boolean;
   message: string;
 };
+
+export type IService = {
+  id: string;
+  technicianId: string;
+  categoryId: string;
+  title: string;
+  description: string;
+  price: string;
+  durationMins: number;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+
+}
+
+
+
+export type ITechnicianProfile = {
+  id: string;
+  userId: string;
+  bio: string;
+  skills: string[];
+  experience: number;
+  hourlyRate: string;
+  location: string;
+  availability:{
+    days: string[],
+    hours: string
+  }
+  averageRating: string;
+  reviewCount: number;
+  createdAt: string;
+  updatedAt: string;
+
+}

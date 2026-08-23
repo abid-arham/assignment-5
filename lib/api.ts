@@ -45,9 +45,10 @@ export async function api<T>(path: string, options: ApiOptions = {}): Promise<Ap
     const body: ApiEnvelope<T> = await res.json();
 
     if (!res.ok || body.data === undefined) {
+      
       return { ok: false, message: body.message || "Something went wrong" };
     }
-
+    console.log("RAW BODY:", JSON.stringify(body));
     return { ok: true, data: body.data };
   } catch {
     // Network error / invalid JSON - the API is unreachable, not just unhappy
