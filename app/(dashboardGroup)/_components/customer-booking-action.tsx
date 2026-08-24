@@ -3,9 +3,11 @@
 import { useState, useTransition } from "react"
 import { createReviewAction } from "../_actions/createReviewAction"
 import { IBooking } from "@/lib/types"
+import { createCheckoutSessionAction } from "../_actions/createCheckoutSessionAction"
 
 export function CustomerBookingActions({ booking }: { booking: IBooking }) {
   const [isPending, startTransition] = useTransition()
+  const [payError, setPayError] = useState<string | null>(null)
   const [showReviewForm, setShowReviewForm] = useState(false)
   const [rating, setRating] = useState(5)
   const [comment, setComment] = useState("")
@@ -13,14 +15,27 @@ export function CustomerBookingActions({ booking }: { booking: IBooking }) {
 
   if (booking.status === "ACCEPTED") {
     return (
-      <button
-        type="button"
-        disabled
-        title="Payments aren't available yet"
-        className="rounded-full bg-primary/50 px-4 py-2 text-sm font-semibold text-primary-foreground cursor-not-allowed"
-      >
-        Pay Now
-      </button>
+      <div className="flex flex-col gap-1.5">
+        {payError && <p className="text-sm text-destructive">{payError}</p>}
+        <button
+          type="button"
+          disabled={isPending}
+          onClick={() => {
+            setPayError(null)
+            startTransition(async () => {
+              const result = await createCheckoutSessionAction(booking.id)
+              if (!result.success) {
+                setPayError(result.message)
+                return
+              }
+              window.location.href = result.paymentUrl // redirect to Stripe's hosted checkout page
+            })
+          }}
+          className="rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-50"
+        >
+          {isPending ? "Redirecting..." : "Pay Now"}
+        </button>
+      </div>
     )
   }
 
