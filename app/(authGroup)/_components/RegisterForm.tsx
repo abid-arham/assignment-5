@@ -50,7 +50,7 @@ const RegisterForm = ()=> {
           </CardDescription>
           <CardAction>
             <Button variant="link">
-              <Link href={"/login"}>Login</Link>
+              <Link href={"/auth/login"}>Login</Link>
             </Button>
           </CardAction>
         </CardHeader>

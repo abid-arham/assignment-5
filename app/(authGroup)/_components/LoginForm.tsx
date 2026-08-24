@@ -49,7 +49,7 @@ const LoginForm = () => {
         </CardDescription>
         <CardAction>
           <Button variant="link">
-              <Link href={"/register"}>Register</Link>
+              <Link href={"/auth/register"}>Register</Link>
             </Button>
         </CardAction>
       </CardHeader>
