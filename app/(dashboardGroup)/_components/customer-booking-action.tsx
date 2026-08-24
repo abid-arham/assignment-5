@@ -1,17 +1,74 @@
 "use client"
 
 import { useState, useTransition } from "react"
+import { useRouter } from "next/navigation"
 import { createReviewAction } from "../_actions/createReviewAction"
-import { IBooking } from "@/lib/types"
 import { createCheckoutSessionAction } from "../_actions/createCheckoutSessionAction"
+import { cancelBookingAction } from "../_actions/cancelBookingAction"
+import { IBooking } from "@/lib/types"
 
 export function CustomerBookingActions({ booking }: { booking: IBooking }) {
+  const router = useRouter()
   const [isPending, startTransition] = useTransition()
+
+  // Pay Now
   const [payError, setPayError] = useState<string | null>(null)
+
+  // Review
   const [showReviewForm, setShowReviewForm] = useState(false)
   const [rating, setRating] = useState(5)
   const [comment, setComment] = useState("")
   const [message, setMessage] = useState<string | null>(null)
+
+  // Cancel
+  const [confirmingCancel, setConfirmingCancel] = useState(false)
+  const [cancelError, setCancelError] = useState<string | null>(null)
+
+  if (booking.status === "REQUESTED") {
+    return (
+      <div className="flex flex-col gap-1.5">
+        {cancelError && <p className="text-sm text-destructive">{cancelError}</p>}
+        {!confirmingCancel ? (
+          <button
+            type="button"
+            onClick={() => setConfirmingCancel(true)}
+            className="self-start rounded-full border border-destructive/30 px-4 py-2 text-sm font-semibold text-destructive"
+          >
+            Cancel booking
+          </button>
+        ) : (
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-muted-foreground">Cancel this booking?</span>
+            <button
+              type="button"
+              disabled={isPending}
+              onClick={() => {
+                setCancelError(null)
+                startTransition(async () => {
+                  const result = await cancelBookingAction(booking.id)
+                  if (!result.success) {
+                    setCancelError(result.message)
+                    return
+                  }
+                  router.refresh()
+                })
+              }}
+              className="rounded-full bg-destructive px-3 py-1.5 text-sm font-semibold text-destructive-foreground disabled:opacity-50"
+            >
+              {isPending ? "Cancelling..." : "Yes, cancel"}
+            </button>
+            <button
+              type="button"
+              onClick={() => setConfirmingCancel(false)}
+              className="rounded-full px-3 py-1.5 text-sm font-medium text-muted-foreground"
+            >
+              No
+            </button>
+          </div>
+        )}
+      </div>
+    )
+  }
 
   if (booking.status === "ACCEPTED") {
     return (
@@ -28,7 +85,7 @@ export function CustomerBookingActions({ booking }: { booking: IBooking }) {
                 setPayError(result.message)
                 return
               }
-              window.location.href = result.paymentUrl // redirect to Stripe's hosted checkout page
+              window.location.href = result.paymentUrl
             })
           }}
           className="rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-50"
