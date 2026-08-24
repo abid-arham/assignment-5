@@ -261,7 +261,7 @@ export function TechnicianProfileForm({
 
           <div className="flex items-center gap-2">
             <span className="text-sm text-muted-foreground">
-              ৳
+              $
             </span>
 
             <input

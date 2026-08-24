@@ -85,6 +85,29 @@ export type IBooking = {
 
 export type IBookingStatus = 
   "ACCEPTED"|
-  "DECLINE"|      
+  "DECLINED"|      
   "IN_PROGRESS"|
-  "COMPLETE"      
+  "COMPLETED"|
+  "REQUESTED"|
+  "CANCELLED"|
+  "PAID"
+
+
+  export type IActiveStatus = "ACTIVE" | "BLOCKED";
+
+export type IAdminUser = {
+  id: string;
+  name: string;
+  email: string;
+  role: IRole;
+  activeStatus: IActiveStatus;
+  createdAt: string;
+};
+
+export type ICategory = {
+  id: string;
+  name: string;
+  description: string | null;
+  createdAt: string;
+  updatedAt: string;
+};

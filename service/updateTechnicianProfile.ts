@@ -1,10 +1,5 @@
 import { api } from "@/lib/api"
-
-interface ApiResponse<T> {
-  success: boolean
-  message: string
-  data: T
-}
+import { ITechnicianProfile } from "@/lib/types"
 
 export interface UpdateTechnicianProfilePayload {
   skills: string[]
@@ -13,15 +8,22 @@ export interface UpdateTechnicianProfilePayload {
   location: string
 }
 
+export type UpdateTechnicianProfileResult =
+  | { success: true; data: ITechnicianProfile }
+  | { success: false; message: string }
+
 export const updateTechnicianProfile = async (
   payload: UpdateTechnicianProfilePayload
-) => {
-  const response = await api<
-    ApiResponse<unknown>
-  >("/technicians/profile", {
-    method: "PUT",
+): Promise<UpdateTechnicianProfileResult> => {
+  const result = await api<ITechnicianProfile>("/api/technicians/profile", {
+    method: "PUT", 
     body: JSON.stringify(payload),
+    auth: true,
   })
 
-  return response
+  if (!result.ok) {
+    return { success: false, message: result.message }
+  }
+
+  return { success: true, data: result.data }
 }
