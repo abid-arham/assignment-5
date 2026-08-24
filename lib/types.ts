@@ -111,3 +111,15 @@ export type ICategory = {
   createdAt: string;
   updatedAt: string;
 };
+
+
+export interface IAvailableSlot {
+  start: string   // ISO datetime
+  end: string     // ISO datetime
+}
+
+export interface ITechnicianAvailabilityResponse {
+  date: string
+  durationMins?: number
+  slots: IAvailableSlot[]
+}

@@ -3,6 +3,7 @@
 import { useMemo, useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import { createBookingAction } from "../_actions/createBookingAction"
+import TechnicianSlotPicker from "./technician-slot-picker"
 
 type BookingFormProps = {
   technicians: { id: string; name: string; hourlyRate: string }[]
@@ -15,6 +16,7 @@ export function BookingForm({ technicians, services }: BookingFormProps) {
   const [error, setError] = useState<string | null>(null)
   const [technicianId, setTechnicianId] = useState("")
   const [serviceId, setServiceId] = useState("")
+  const [scheduledAt, setScheduledAt] = useState("")
 
   const selectedTechnician = useMemo(
     () => technicians.find((t) => t.id === technicianId) ?? null,
@@ -36,12 +38,11 @@ export function BookingForm({ technicians, services }: BookingFormProps) {
   const handleSubmit = (formData: FormData) => {
     setError(null)
 
-    const scheduledAt = formData.get("scheduledAt") as string
     const location = formData.get("location") as string
     const notes = formData.get("notes") as string
 
     if (!technicianId || !serviceId || !scheduledAt || !location) {
-      setError("Please fill in all required fields.")
+      setError("Please fill in all required fields, including a time slot.")
       return
     }
 
@@ -54,7 +55,7 @@ export function BookingForm({ technicians, services }: BookingFormProps) {
       const result = await createBookingAction({
         technicianId,
         serviceId,
-        scheduledAt: new Date(scheduledAt).toISOString(),
+        scheduledAt,
         location,
         notes: notes || undefined,
         totalAmount: Number(estimatedTotal.toFixed(2)),
@@ -85,7 +86,10 @@ export function BookingForm({ technicians, services }: BookingFormProps) {
           name="serviceId"
           required
           value={serviceId}
-          onChange={(e) => setServiceId(e.target.value)}
+          onChange={(e) => {
+            setServiceId(e.target.value)
+            setScheduledAt("")
+          }}
           className="rounded-lg border border-border bg-background px-3 py-2 text-sm"
         >
           <option value="">Select a service</option>
@@ -102,7 +106,10 @@ export function BookingForm({ technicians, services }: BookingFormProps) {
           name="technicianId"
           required
           value={technicianId}
-          onChange={(e) => setTechnicianId(e.target.value)}
+          onChange={(e) => {
+            setTechnicianId(e.target.value)
+            setScheduledAt("")
+          }}
           className="rounded-lg border border-border bg-background px-3 py-2 text-sm"
         >
           <option value="">Select a technician</option>
@@ -120,8 +127,19 @@ export function BookingForm({ technicians, services }: BookingFormProps) {
       )}
 
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="scheduledAt" className="text-sm font-medium text-foreground">Date & time</label>
-        <input type="datetime-local" id="scheduledAt" name="scheduledAt" required className="rounded-lg border border-border bg-background px-3 py-2 text-sm" />
+        <p className="text-sm font-medium text-foreground">Date & time</p>
+        {technicianId ? (
+          <TechnicianSlotPicker
+            technicianId={technicianId}
+            serviceId={serviceId || undefined}
+            selectedSlot={scheduledAt}
+            onSelectSlot={setScheduledAt}
+          />
+        ) : (
+          <p className="text-sm text-muted-foreground">
+            Select a technician first to see available times.
+          </p>
+        )}
       </div>
 
       <div className="flex flex-col gap-1.5">
@@ -136,7 +154,7 @@ export function BookingForm({ technicians, services }: BookingFormProps) {
 
       <button
         type="submit"
-        disabled={isPending || estimatedTotal === null}
+        disabled={isPending || estimatedTotal === null || !scheduledAt}
         className="rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground disabled:opacity-50"
       >
         {isPending ? "Booking..." : "Confirm booking"}

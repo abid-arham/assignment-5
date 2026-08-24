@@ -1,11 +1,3 @@
-import { cookies } from "next/headers"
-
-const BACKEND_API_URL = process.env.BACKEND_API_URL
-
-if (!BACKEND_API_URL) {
-  throw new Error("BACKEND_API_URL is not defined")
-}
-
 type ApiEnvelope<T> = {
   message?: string;
   data?: T;
@@ -22,10 +14,15 @@ export async function api<T>(path: string, options: ApiOptions = {}): Promise<Ap
 
   const authHeader: HeadersInit = {};
   if (auth) {
+    // ponytail: dynamic import so client bundles don't break
+    const { cookies } = await import("next/headers");
     const accessToken = (await cookies()).get("accessToken")?.value;
     if (!accessToken) return { ok: false, message: "Not logged in" };
     authHeader.Authorization = `Bearer ${accessToken}`;
   }
+
+  const BACKEND_API_URL = process.env.NEXT_PUBLIC_BACKEND_API_URL;
+  if (!BACKEND_API_URL) return { ok: false, message: "NEXT_PUBLIC_BACKEND_API_URL is not defined" };
 
   try {
     const res = await fetch(`${BACKEND_API_URL}${path}`, {
