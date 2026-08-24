@@ -114,7 +114,7 @@ export default async function TechnicianDashboard() {
           </p>
 
           <p className="mt-2 text-3xl font-bold">
-            ৳{totalEarnings.toLocaleString()}
+            ${totalEarnings.toLocaleString()}
           </p>
         </div>
       </div>
@@ -158,7 +158,7 @@ export default async function TechnicianDashboard() {
               </p>
 
               <p className="mt-1 font-medium">
-                ৳
+                $
                 {Number(
                   technician.hourlyRate
                 ).toLocaleString()}
@@ -271,7 +271,7 @@ export default async function TechnicianDashboard() {
                     </div>
 
                     <p className="text-lg font-semibold">
-                      ৳
+                      $
                       {Number(
                         booking.totalAmount
                       ).toLocaleString()}
@@ -388,7 +388,7 @@ export default async function TechnicianDashboard() {
                         </td>
 
                         <td className="px-4 py-4 text-right font-medium">
-                          ৳
+                          $
                           {Number(
                             booking.totalAmount
                           ).toLocaleString()}

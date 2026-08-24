@@ -115,7 +115,7 @@ export default async function BookingDetailPage({
               </p>
 
               <p className="font-medium">
-                ৳
+                $
                 {Number(
                   booking.totalAmount
                 ).toLocaleString()}
@@ -173,7 +173,7 @@ export default async function BookingDetailPage({
                 </p>
 
                 <p>
-                  ৳
+                  $
                   {Number(
                     technician.hourlyRate
                   ).toLocaleString()}

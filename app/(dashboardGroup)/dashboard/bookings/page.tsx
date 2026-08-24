@@ -16,7 +16,7 @@ function formatAmount(amount: string) {
   const n = Number(amount)
 
   return Number.isFinite(n)
-    ? `৳${n.toFixed(2)}`
+    ? `$${n.toFixed(2)}`
     : amount
 }
 
