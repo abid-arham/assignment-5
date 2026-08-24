@@ -13,6 +13,10 @@ export const updateBookingStatusAction = async (
   bookingId: string,
   status: BookingStatusValue
 ): Promise<UpdateBookingStatusState> => {
+  if (!bookingId) {
+    return { success: false, message: "Booking ID is required." }
+  }
+
   const result = await api<IBooking>(`/api/technicians/bookings/${bookingId}`, {
     method: "PATCH",
     body: JSON.stringify({ status }),
@@ -23,5 +27,5 @@ export const updateBookingStatusAction = async (
     return { success: false, message: result.message }
   }
 
-  return { success: true, message: "Booking status updated." }
+  return { success: true, message: "Booking status updated successfully." }
 }

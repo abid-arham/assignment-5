@@ -2,11 +2,13 @@
 
 import { api } from "@/lib/api"
 
-type CheckoutResult =
-  | { success: true; paymentUrl: string }
-  | { success: false; message: string }
+export const createCheckoutSessionAction = async (
+  bookingId: string
+): Promise<{ success: boolean; message: string; url?: string }> => {
+  if (!bookingId) {
+    return { success: false, message: "Booking ID is required." }
+  }
 
-export const createCheckoutSessionAction = async (bookingId: string): Promise<CheckoutResult> => {
   const result = await api<{ paymentUrl: string }>("/api/payments/create", {
     method: "POST",
     body: JSON.stringify({ bookingId }),
@@ -17,5 +19,5 @@ export const createCheckoutSessionAction = async (bookingId: string): Promise<Ch
     return { success: false, message: result.message }
   }
 
-  return { success: true, paymentUrl: result.data.paymentUrl }
+  return { success: true, message: "Checkout session created.", url: result.data.paymentUrl }
 }

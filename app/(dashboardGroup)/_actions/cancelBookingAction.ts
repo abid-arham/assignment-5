@@ -1,15 +1,15 @@
 "use server"
 
 import { api } from "@/lib/api"
-import { IBooking } from "@/lib/types"
 
-export type CancelBookingState = {
-  success: boolean
-  message: string
-}
+export const cancelBookingAction = async (
+  bookingId: string
+): Promise<{ success: boolean; message: string }> => {
+  if (!bookingId) {
+    return { success: false, message: "Booking ID is required." }
+  }
 
-export const cancelBookingAction = async (bookingId: string): Promise<CancelBookingState> => {
-  const result = await api<IBooking>(`/api/bookings/${bookingId}/cancel`, {
+  const result = await api(`/api/bookings/${bookingId}/cancel`, {
     method: "PATCH",
     auth: true,
   })
@@ -18,5 +18,5 @@ export const cancelBookingAction = async (bookingId: string): Promise<CancelBook
     return { success: false, message: result.message }
   }
 
-  return { success: true, message: "Booking cancelled." }
+  return { success: true, message: "Booking cancelled successfully." }
 }

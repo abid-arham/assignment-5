@@ -1,169 +1,270 @@
 "use client"
 
-import { useState, useTransition } from "react"
+import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { createReviewAction } from "../_actions/createReviewAction"
-import { createCheckoutSessionAction } from "../_actions/createCheckoutSessionAction"
-import { cancelBookingAction } from "../_actions/cancelBookingAction"
+
+import { cancelBookingAction } from "@/app/(dashboardGroup)/_actions/cancelBookingAction"
+import { createCheckoutSessionAction } from "@/app/(dashboardGroup)/_actions/createCheckoutSessionAction"
+import { createReviewAction } from "@/app/(dashboardGroup)/_actions/createReviewAction"
 import { IBooking } from "@/lib/types"
 
-export function CustomerBookingActions({ booking }: { booking: IBooking }) {
+interface CustomerBookingActionProps {
+  booking: IBooking
+}
+
+export default function CustomerBookingAction({ booking }: CustomerBookingActionProps) {
+  
   const router = useRouter()
-  const [isPending, startTransition] = useTransition()
 
-  // Pay Now
-  const [payError, setPayError] = useState<string | null>(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState("")
+  const [showReview, setShowReview] = useState(false)
 
-  // Review
-  const [showReviewForm, setShowReviewForm] = useState(false)
   const [rating, setRating] = useState(5)
   const [comment, setComment] = useState("")
-  const [message, setMessage] = useState<string | null>(null)
 
-  // Cancel
-  const [confirmingCancel, setConfirmingCancel] = useState(false)
-  const [cancelError, setCancelError] = useState<string | null>(null)
+  const handleCancel = async () => {
+    const confirmed = window.confirm(
+      "Are you sure you want to cancel this booking?"
+    )
 
-  if (booking.status === "REQUESTED") {
+    if (!confirmed) {
+      return
+    }
+
+    setLoading(true)
+    setError("")
+
+    const result = await cancelBookingAction(
+      booking.id
+    )
+
+    setLoading(false)
+
+    if (!result.success) {
+      setError(result.message)
+      return
+    }
+
+    router.refresh()
+  }
+
+  const handlePayment = async () => {
+    setLoading(true)
+    setError("")
+
+    const result =
+      await createCheckoutSessionAction(
+        booking.id
+      )
+
+    if (!result.success) {
+      setLoading(false)
+      setError(result.message)
+      return
+    }
+
+    if (!result.url) {
+      setLoading(false)
+      setError(
+        "Payment checkout URL was not returned."
+      )
+      return
+    }
+
+    window.location.href = result.url
+  }
+
+  const handleReview = async () => {
+    setLoading(true)
+    setError("")
+const result = await createReviewAction({
+  bookingId: booking.id,
+  technicianId: booking.technicianId,
+  rating,
+  comment: comment || undefined,
+})
+
+    setLoading(false)
+
+    if (!result.success) {
+      setError(result.message)
+      return
+    }
+
+    setShowReview(false)
+    setComment("")
+    setRating(5)
+
+    router.refresh()
+  }
+
+  if (booking.status === "CANCELLED") {
     return (
-      <div className="flex flex-col gap-1.5">
-        {cancelError && <p className="text-sm text-destructive">{cancelError}</p>}
-        {!confirmingCancel ? (
+      <div className="text-sm text-muted-foreground">
+        This booking has been cancelled.
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-4">
+      {error && (
+        <div className="rounded-md border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-700">
+          {error}
+        </div>
+      )}
+
+      <div className="flex flex-wrap gap-3">
+        {booking.status === "REQUESTED" && (
           <button
             type="button"
-            onClick={() => setConfirmingCancel(true)}
-            className="self-start rounded-full border border-destructive/30 px-4 py-2 text-sm font-semibold text-destructive"
+            onClick={handleCancel}
+            disabled={loading}
+            className="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-50"
           >
-            Cancel booking
+            {loading
+              ? "Cancelling..."
+              : "Cancel Booking"}
           </button>
-        ) : (
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground">Cancel this booking?</span>
-            <button
-              type="button"
-              disabled={isPending}
-              onClick={() => {
-                setCancelError(null)
-                startTransition(async () => {
-                  const result = await cancelBookingAction(booking.id)
-                  if (!result.success) {
-                    setCancelError(result.message)
-                    return
-                  }
-                  router.refresh()
-                })
-              }}
-              className="rounded-full bg-destructive px-3 py-1.5 text-sm font-semibold text-destructive-foreground disabled:opacity-50"
-            >
-              {isPending ? "Cancelling..." : "Yes, cancel"}
-            </button>
-            <button
-              type="button"
-              onClick={() => setConfirmingCancel(false)}
-              className="rounded-full px-3 py-1.5 text-sm font-medium text-muted-foreground"
-            >
-              No
-            </button>
-          </div>
+        )}
+
+        {booking.status === "ACCEPTED" && (
+          <button
+            type="button"
+            onClick={handlePayment}
+            disabled={loading}
+            className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {loading
+              ? "Redirecting..."
+              : "Pay Now"}
+          </button>
+        )}
+
+        {booking.status === "COMPLETED" && (
+          <button
+            type="button"
+            onClick={() =>
+              setShowReview((current) => !current)
+            }
+            disabled={loading}
+            className="rounded-md bg-black px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            Leave Review
+          </button>
+        )}
+
+        {booking.status === "IN_PROGRESS" && (
+          <p className="text-sm text-muted-foreground">
+            This booking is currently in progress.
+            It cannot be cancelled.
+          </p>
+        )}
+
+        {booking.status === "PAID" && (
+          <p className="text-sm text-muted-foreground">
+            Payment completed. Your technician can now
+            start the job.
+          </p>
+        )}
+
+        {booking.status === "DECLINED" && (
+          <p className="text-sm text-red-600">
+            The technician declined this booking.
+          </p>
         )}
       </div>
-    )
-  }
 
-  if (booking.status === "ACCEPTED") {
-    return (
-      <div className="flex flex-col gap-1.5">
-        {payError && <p className="text-sm text-destructive">{payError}</p>}
-        <button
-          type="button"
-          disabled={isPending}
-          onClick={() => {
-            setPayError(null)
-            startTransition(async () => {
-              const result = await createCheckoutSessionAction(booking.id)
-              if (!result.success) {
-                setPayError(result.message)
-                return
+      {showReview && (
+        <div className="max-w-lg rounded-lg border p-5">
+          <h3 className="font-semibold">
+            Leave a Review
+          </h3>
+
+          <div className="mt-4">
+            <label
+              htmlFor="rating"
+              className="block text-sm font-medium"
+            >
+              Rating
+            </label>
+
+            <select
+              id="rating"
+              value={rating}
+              onChange={(event) =>
+                setRating(
+                  Number(event.target.value)
+                )
               }
-              window.location.href = result.paymentUrl
-            })
-          }}
-          className="rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-50"
-        >
-          {isPending ? "Redirecting..." : "Pay Now"}
-        </button>
-      </div>
-    )
-  }
+              disabled={loading}
+              className="mt-2 w-full rounded-md border px-3 py-2"
+            >
+              <option value={5}>
+                5 — Excellent
+              </option>
+              <option value={4}>
+                4 — Good
+              </option>
+              <option value={3}>
+                3 — Average
+              </option>
+              <option value={2}>
+                2 — Poor
+              </option>
+              <option value={1}>
+                1 — Very Poor
+              </option>
+            </select>
+          </div>
 
-  if (booking.status === "COMPLETED") {
-    if (message) {
-      return <p className="text-sm text-muted-foreground">{message}</p>
-    }
+          <div className="mt-4">
+            <label
+              htmlFor="comment"
+              className="block text-sm font-medium"
+            >
+              Comment
+            </label>
 
-    if (!showReviewForm) {
-      return (
-        <button
-          type="button"
-          onClick={() => setShowReviewForm(true)}
-          className="rounded-full border border-border px-4 py-2 text-sm font-semibold text-foreground"
-        >
-          Leave a Review
-        </button>
-      )
-    }
+            <textarea
+              id="comment"
+              value={comment}
+              onChange={(event) =>
+                setComment(event.target.value)
+              }
+              disabled={loading}
+              rows={4}
+              placeholder="Tell us about your experience..."
+              className="mt-2 w-full rounded-md border px-3 py-2"
+            />
+          </div>
 
-    return (
-      <div className="flex flex-col gap-2 rounded-lg border border-border bg-muted/40 p-4">
-        <label className="text-sm font-medium text-foreground">
-          Rating
-          <select
-            value={rating}
-            onChange={(e) => setRating(Number(e.target.value))}
-            className="ml-2 rounded-md border border-border bg-background px-2 py-1 text-sm"
-          >
-            {[5, 4, 3, 2, 1].map((n) => (
-              <option key={n} value={n}>{n} star{n > 1 ? "s" : ""}</option>
-            ))}
-          </select>
-        </label>
-        <textarea
-          value={comment}
-          onChange={(e) => setComment(e.target.value)}
-          placeholder="How was the service?"
-          rows={2}
-          className="rounded-md border border-border bg-background px-2 py-1.5 text-sm"
-        />
-        <div className="flex gap-2">
-          <button
-            type="button"
-            disabled={isPending}
-            onClick={() => {
-              startTransition(async () => {
-                const result = await createReviewAction({
-                  bookingId: booking.id,
-                  technicianId: booking.technicianId,
-                  rating,
-                  comment: comment || undefined,
-                })
-                setMessage(result.success ? "Thanks for your review!" : result.message)
-              })
-            }}
-            className="rounded-full bg-primary px-4 py-1.5 text-sm font-semibold text-primary-foreground disabled:opacity-50"
-          >
-            {isPending ? "Submitting..." : "Submit"}
-          </button>
-          <button
-            type="button"
-            onClick={() => setShowReviewForm(false)}
-            className="rounded-full px-4 py-1.5 text-sm font-semibold text-muted-foreground"
-          >
-            Cancel
-          </button>
+          <div className="mt-4 flex gap-3">
+            <button
+              type="button"
+              onClick={handleReview}
+              disabled={loading}
+              className="rounded-md bg-black px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {loading
+                ? "Submitting..."
+                : "Submit Review"}
+            </button>
+
+            <button
+              type="button"
+              onClick={() =>
+                setShowReview(false)
+              }
+              disabled={loading}
+              className="rounded-md border px-4 py-2 text-sm font-medium disabled:opacity-50"
+            >
+              Cancel
+            </button>
+          </div>
         </div>
-      </div>
-    )
-  }
-
-  return null
+      )}
+    </div>
+  )
 }

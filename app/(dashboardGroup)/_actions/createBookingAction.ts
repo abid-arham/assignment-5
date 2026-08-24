@@ -1,42 +1,40 @@
 "use server"
 
 import { api } from "@/lib/api"
-import { IBooking, IBookingFormInput } from "@/lib/types"
-import { getMe } from "@/service/getMe"
-import { AsyncCallbackSet } from "next/dist/server/lib/async-callback-set"
+import { IBooking } from "@/lib/types"
 
-export type CreateBookingState = {
-    success: boolean
-    message: string
+interface CreateBookingPayload {
+  technicianId: string
+  serviceId: string
+  scheduledAt: string
+  location: string
+  notes?: string
+  totalAmount: number
 }
 
-export const createBookingAction = async(input: IBookingFormInput):Promise<CreateBookingState>=>{
-    const user = await getMe();
-    if(!user){
-        return{
-            success:false,
-            message:"You must be logged in to book a service"
-        }
-    }
+export const createBookingAction = async (
+  payload: CreateBookingPayload
+): Promise<{ success: boolean; message: string; data?: IBooking }> => {
+  if (!payload.technicianId || !payload.serviceId || !payload.scheduledAt || !payload.location) {
+    return { success: false, message: "Please provide all required booking information." }
+  }
 
-    const result = await api<IBooking>("/api/bookings", {
-        method: "POST",
-        body: JSON.stringify({
-            ...input,
-            customerId: user.id
-        }),
-        auth: true
-    })
+  const result = await api<IBooking>("/api/bookings", {
+    method: "POST",
+    body: JSON.stringify({
+      technicianId: payload.technicianId,
+      serviceId: payload.serviceId,
+      scheduledAt: payload.scheduledAt,
+      location: payload.location,
+      notes: payload.notes ?? "",
+      totalAmount: payload.totalAmount,
+    }),
+    auth: true,
+  })
 
-    if(!result.ok){
-        return{
-            success: false,
-            message: result.message
-        }
-    }
+  if (!result.ok) {
+    return { success: false, message: result.message }
+  }
 
-    return {
-        success: true,
-        message: "Booking created successfully"
-    }
+  return { success: true, message: "Booking created successfully.", data: result.data }
 }

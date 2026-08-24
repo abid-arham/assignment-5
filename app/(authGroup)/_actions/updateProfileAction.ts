@@ -9,9 +9,14 @@ export type UpdateProfileState = {
 }
 
 export const updateProfileAction = async (name: string): Promise<UpdateProfileState> => {
+  const trimmedName = name.trim()
+  if (!trimmedName) {
+    return { success: false, message: "Name cannot be empty." }
+  }
+
   const result = await api<IUser>("/api/auth/me", {
     method: "PATCH",
-    body: JSON.stringify({ name }),
+    body: JSON.stringify({ name: trimmedName }),
     auth: true,
   })
 

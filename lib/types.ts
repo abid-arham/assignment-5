@@ -85,6 +85,6 @@ export type IBooking = {
 
 export type IBookingStatus = 
   "ACCEPTED"|
-  "DECLINE"|
+  "DECLINE"|      
   "IN_PROGRESS"|
-  "COMPLETE"
+  "COMPLETE"      
