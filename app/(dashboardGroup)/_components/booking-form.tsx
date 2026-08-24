@@ -4,6 +4,7 @@ import { useMemo, useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import { createBookingAction } from "../_actions/createBookingAction"
 import TechnicianSlotPicker from "./technician-slot-picker"
+import { toast } from "sonner"
 
 type BookingFormProps = {
   technicians: { id: string; name: string; hourlyRate: string }[]
@@ -42,12 +43,16 @@ export function BookingForm({ technicians, services }: BookingFormProps) {
     const notes = formData.get("notes") as string
 
     if (!technicianId || !serviceId || !scheduledAt || !location) {
-      setError("Please fill in all required fields, including a time slot.")
+      const msg = "Please fill in all required fields, including a time slot."
+      setError(msg)
+      toast.error(msg)
       return
     }
 
     if (estimatedTotal === null) {
-      setError("Could not calculate a total for this selection.")
+      const msg = "Could not calculate a total for this selection."
+      setError(msg)
+      toast.error(msg)
       return
     }
 
@@ -63,9 +68,11 @@ export function BookingForm({ technicians, services }: BookingFormProps) {
 
       if (!result.success) {
         setError(result.message)
+        toast.error(result.message)
         return
       }
 
+      toast.success("Booking created successfully!")
       router.push("/dashboard")
       router.refresh()
     })

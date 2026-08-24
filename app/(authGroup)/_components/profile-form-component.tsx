@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useTransition } from "react"
+import { toast } from "sonner"
 import { updateProfileAction } from "../_actions/updateProfileAction"
 import { changePasswordAction } from "../_actions/changePasswordAction"
 
@@ -53,6 +54,12 @@ export function ProfileForms({
         text: result.message,
         isError: !result.success,
       })
+
+      if (result.success) {
+        toast.success(result.message)
+      } else {
+        toast.error(result.message)
+      }
     })
   }
 
@@ -81,8 +88,11 @@ export function ProfileForms({
       })
 
       if (result.success) {
+        toast.success(result.message)
         setCurrentPassword("")
         setNewPassword("")
+      } else {
+        toast.error(result.message)
       }
     })
   }

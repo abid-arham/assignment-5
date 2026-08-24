@@ -1,6 +1,7 @@
 "use server"
 
 import { api } from "@/lib/api"
+import { changePasswordSchema } from "@/lib/validations"
 
 export type ChangePasswordState = {
   success: boolean
@@ -11,17 +12,15 @@ export const changePasswordAction = async (
   currentPassword: string,
   newPassword: string
 ): Promise<ChangePasswordState> => {
-  if (!currentPassword || !newPassword) {
-    return { success: false, message: "Current password and new password are required." }
-  }
+  const parsed = changePasswordSchema.safeParse({ currentPassword, newPassword })
 
-  if (newPassword.length < 6) {
-    return { success: false, message: "New password must be at least 6 characters." }
+  if (!parsed.success) {
+    return { success: false, message: parsed.error.issues[0]?.message || "Invalid input." }
   }
 
   const result = await api("/api/auth/me/password", {
     method: "PATCH",
-    body: JSON.stringify({ currentPassword, newPassword }),
+    body: JSON.stringify(parsed.data),
     auth: true,
   })
 

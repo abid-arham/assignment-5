@@ -2,6 +2,7 @@
 
 import { api } from "@/lib/api"
 import { IBooking } from "@/lib/types"
+import { bookingSchema } from "@/lib/validations"
 
 interface CreateBookingPayload {
   technicianId: string
@@ -15,19 +16,21 @@ interface CreateBookingPayload {
 export const createBookingAction = async (
   payload: CreateBookingPayload
 ): Promise<{ success: boolean; message: string; data?: IBooking }> => {
-  if (!payload.technicianId || !payload.serviceId || !payload.scheduledAt || !payload.location) {
-    return { success: false, message: "Please provide all required booking information." }
+  const parsed = bookingSchema.safeParse(payload)
+
+  if (!parsed.success) {
+    return { success: false, message: parsed.error.issues[0]?.message || "Invalid booking details." }
   }
 
   const result = await api<IBooking>("/api/bookings", {
     method: "POST",
     body: JSON.stringify({
-      technicianId: payload.technicianId,
-      serviceId: payload.serviceId,
-      scheduledAt: payload.scheduledAt,
-      location: payload.location,
-      notes: payload.notes ?? "",
-      totalAmount: payload.totalAmount,
+      technicianId: parsed.data.technicianId,
+      serviceId: parsed.data.serviceId,
+      scheduledAt: parsed.data.scheduledAt,
+      location: parsed.data.location,
+      notes: parsed.data.notes ?? "",
+      totalAmount: parsed.data.totalAmount,
     }),
     auth: true,
   })

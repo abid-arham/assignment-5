@@ -5,6 +5,7 @@ import { redirect } from "next/navigation"
 import { api } from "@/lib/api"
 import { ILoginState, IUser } from "@/lib/types"
 import { logout } from "@/service/logout"
+import { loginSchema, registerSchema } from "@/lib/validations"
 
 type AuthData = {
   accessToken: string
@@ -48,14 +49,16 @@ export const loginAction = async (
   prevState: ILoginState,
   formData: FormData
 ): Promise<ILoginState> => {
-  const email = String(formData.get("email") ?? "").trim()
-  const password = String(formData.get("password") ?? "")
+  const parsed = loginSchema.safeParse({
+    email: String(formData.get("email") ?? "").trim(),
+    password: String(formData.get("password") ?? ""),
+  })
 
-  if (!email || !password) {
-    return { success: false, message: "Email and password are required." }
+  if (!parsed.success) {
+    return { success: false, message: parsed.error.issues[0]?.message || "Invalid input." }
   }
 
-  let destination: string
+  const { email, password } = parsed.data
 
   const result = await api<AuthData>("/api/auth/login", {
     method: "POST",
@@ -80,27 +83,25 @@ export const loginAction = async (
     }
   }
 
-  destination = dashboardPath(userResult.data.role)
-
-  redirect(destination)
+  redirect(dashboardPath(userResult.data.role))
 }
 
 export const registerAction = async (
   prevState: ILoginState,
   formData: FormData
 ): Promise<ILoginState> => {
-  const name = String(formData.get("name") ?? "").trim()
-  const email = String(formData.get("email") ?? "").trim()
-  const password = String(formData.get("password") ?? "")
-  const role = String(formData.get("role") ?? "")
+  const parsed = registerSchema.safeParse({
+    name: String(formData.get("name") ?? "").trim(),
+    email: String(formData.get("email") ?? "").trim(),
+    password: String(formData.get("password") ?? ""),
+    role: String(formData.get("role") ?? ""),
+  })
 
-  if (!name || !email || !password || !role) {
-    return { success: false, message: "All fields are required." }
+  if (!parsed.success) {
+    return { success: false, message: parsed.error.issues[0]?.message || "Invalid input." }
   }
 
-  if (role !== "CUSTOMER" && role !== "TECHNICIAN") {
-    return { success: false, message: "Invalid role selected." }
-  }
+  const { name, email, password, role } = parsed.data
 
   const registerResult = await api<IUser>("/api/auth/register", {
     method: "POST",

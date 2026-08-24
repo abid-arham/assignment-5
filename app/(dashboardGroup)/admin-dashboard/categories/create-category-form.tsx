@@ -1,12 +1,23 @@
 "use client"
 
-import { useActionState } from "react"
+import { useActionState, useEffect } from "react"
 import { createCategoryAction, CreateCategoryState } from "@/app/(dashboardGroup)/_actions/createCategoryAction"
+import { toast } from "sonner"
 
 const initialState: CreateCategoryState = { success: false, message: "" }
 
 export function CreateCategoryForm() {
   const [state, formAction, isPending] = useActionState(createCategoryAction, initialState)
+
+  useEffect(() => {
+    if (state.message) {
+      if (state.success) {
+        toast.success(state.message)
+      } else {
+        toast.error(state.message)
+      }
+    }
+  }, [state])
 
   return (
     <form action={formAction} className="rounded-2xl border bg-card p-6 shadow-sm">
