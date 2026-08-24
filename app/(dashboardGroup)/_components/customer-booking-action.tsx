@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
+import { toast } from "sonner"
 
 import { cancelBookingAction } from "@/app/(dashboardGroup)/_actions/cancelBookingAction"
 import { createCheckoutSessionAction } from "@/app/(dashboardGroup)/_actions/createCheckoutSessionAction"
@@ -17,7 +18,6 @@ export default function CustomerBookingAction({ booking }: CustomerBookingAction
   const router = useRouter()
 
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState("")
   const [showReview, setShowReview] = useState(false)
 
   const [rating, setRating] = useState(5)
@@ -33,7 +33,6 @@ export default function CustomerBookingAction({ booking }: CustomerBookingAction
     }
 
     setLoading(true)
-    setError("")
 
     const result = await cancelBookingAction(
       booking.id
@@ -42,16 +41,16 @@ export default function CustomerBookingAction({ booking }: CustomerBookingAction
     setLoading(false)
 
     if (!result.success) {
-      setError(result.message)
+      toast.error(result.message)
       return
     }
 
+    toast.success("Booking cancelled")
     router.refresh()
   }
 
   const handlePayment = async () => {
     setLoading(true)
-    setError("")
 
     const result =
       await createCheckoutSessionAction(
@@ -60,13 +59,13 @@ export default function CustomerBookingAction({ booking }: CustomerBookingAction
 
     if (!result.success) {
       setLoading(false)
-      setError(result.message)
+      toast.error(result.message)
       return
     }
 
     if (!result.url) {
       setLoading(false)
-      setError(
+      toast.error(
         "Payment checkout URL was not returned."
       )
       return
@@ -77,7 +76,6 @@ export default function CustomerBookingAction({ booking }: CustomerBookingAction
 
   const handleReview = async () => {
     setLoading(true)
-    setError("")
 const result = await createReviewAction({
   bookingId: booking.id,
   technicianId: booking.technicianId,
@@ -88,10 +86,11 @@ const result = await createReviewAction({
     setLoading(false)
 
     if (!result.success) {
-      setError(result.message)
+      toast.error(result.message)
       return
     }
 
+    toast.success("Review submitted")
     setShowReview(false)
     setComment("")
     setRating(5)
@@ -109,12 +108,6 @@ const result = await createReviewAction({
 
   return (
     <div className="space-y-4">
-      {error && (
-        <div className="rounded-md border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-700">
-          {error}
-        </div>
-      )}
-
       <div className="flex flex-wrap gap-3">
         {booking.status === "REQUESTED" && (
           <button

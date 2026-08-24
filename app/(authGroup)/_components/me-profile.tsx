@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
 import { KeyRound, Mail, Pencil, ShieldCheck, UserRound } from 'lucide-react'
 import type { IUser } from '@/lib/types'
 import { updateProfileAction } from '../_actions/updateProfileAction'
@@ -16,11 +17,9 @@ export function MeProfile({ user }: MeProfileProps) {
   const [isPending, startTransition] = useTransition()
 
   const [name, setName] = useState(user?.name ?? '')
-  const [nameMessage, setNameMessage] = useState<{ text: string; isError: boolean } | null>(null)
 
   const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
-  const [passwordMessage, setPasswordMessage] = useState<{ text: string; isError: boolean } | null>(null)
 
   if (!user) {
     return (
@@ -35,31 +34,43 @@ export function MeProfile({ user }: MeProfileProps) {
     )
   }
 
-  const handleNameSubmit = () => {
-    setNameMessage(null)
+  const handleNameSubmit = async () => {
     if (!name.trim()) {
-      setNameMessage({ text: 'Name cannot be empty.', isError: true })
+      toast.error('Name cannot be empty.')
       return
     }
     startTransition(async () => {
       const result = await updateProfileAction(name.trim())
-      setNameMessage({ text: result.message, isError: !result.success })
-      if (result.success) router.refresh()
+      if (result.success) {
+        toast.success(result.message)
+        router.refresh()
+      } else {
+        toast.error(result.message)
+      }
     })
   }
 
-  const handlePasswordSubmit = () => {
-    setPasswordMessage(null)
+  const handlePasswordSubmit = async () => {
+    if (!currentPassword) {
+      toast.error('Current password is required.')
+      return
+    }
+    if (!newPassword) {
+      toast.error('New password is required.')
+      return
+    }
     if (newPassword.length < 6) {
-      setPasswordMessage({ text: 'New password must be at least 6 characters.', isError: true })
+      toast.error('New password must be at least 6 characters.')
       return
     }
     startTransition(async () => {
       const result = await changePasswordAction(currentPassword, newPassword)
-      setPasswordMessage({ text: result.message, isError: !result.success })
       if (result.success) {
+        toast.success(result.message)
         setCurrentPassword('')
         setNewPassword('')
+      } else {
+        toast.error(result.message)
       }
     })
   }
@@ -132,11 +143,6 @@ export function MeProfile({ user }: MeProfileProps) {
           </div>
 
           <div className="flex flex-col gap-3 px-6 py-6 sm:px-8">
-            {nameMessage && (
-              <p className={`text-sm ${nameMessage.isError ? 'text-destructive' : 'text-muted-foreground'}`}>
-                {nameMessage.text}
-              </p>
-            )}
             <div className="flex flex-col gap-1.5">
               <label htmlFor="name" className="text-sm font-medium text-foreground">Name</label>
               <input
@@ -158,7 +164,7 @@ export function MeProfile({ user }: MeProfileProps) {
           </div>
         </section>
 
-        <section className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+        <section id="change-password" className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
           <div className="flex items-center gap-4 border-b border-border px-6 py-6 sm:px-8">
             <div className="flex size-12 items-center justify-center rounded-full bg-primary text-primary-foreground" aria-hidden="true">
               <KeyRound className="size-5" />
@@ -170,11 +176,6 @@ export function MeProfile({ user }: MeProfileProps) {
           </div>
 
           <div className="flex flex-col gap-3 px-6 py-6 sm:px-8">
-            {passwordMessage && (
-              <p className={`text-sm ${passwordMessage.isError ? 'text-destructive' : 'text-muted-foreground'}`}>
-                {passwordMessage.text}
-              </p>
-            )}
             <div className="flex flex-col gap-1.5">
               <label htmlFor="currentPassword" className="text-sm font-medium text-foreground">Current password</label>
               <input
@@ -197,7 +198,7 @@ export function MeProfile({ user }: MeProfileProps) {
             </div>
             <button
               type="button"
-              disabled={isPending || !currentPassword || !newPassword}
+              disabled={isPending}
               onClick={handlePasswordSubmit}
               className="self-start rounded-full bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-50"
             >

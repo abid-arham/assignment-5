@@ -1,10 +1,10 @@
 import Link from 'next/link'
-import { ArrowRight, ChevronDown, LayoutDashboard, LogOut, User, Wrench } from 'lucide-react'
+import { ArrowRight, ChevronDown, KeyRound, LayoutDashboard, LogOut, User, Wrench } from 'lucide-react'
 import { cookies } from 'next/headers'
 import { logoutAction } from '@/app/(authGroup)/_actions/authActions'
 import { MobileMenu } from './mobile-menu'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu'
-import jwt, { JwtPayload } from "jsonwebtoken"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from './ui/dropdown-menu'
+import { getMe } from '@/service/getMe'
 const links = [
   { label: 'Find a service', href: '/services' },
   { label: 'How it works', href: '#how-it-works' },
@@ -19,20 +19,11 @@ const DASHBOARD_BY_ROLE: Record<string, string> = {
 
 export async function Navbar() {
   const accessToken = (await cookies()).get('accessToken')?.value
+  const user = accessToken ? await getMe() : null
 
-  let role:string | null = null
-  if(accessToken){
-    try {
-      const decodedToken = jwt.verify(accessToken, process.env.JWT_ACCESS_SECRET!) as JwtPayload
-      role = (decodedToken.role as string)
-    } catch (error) {
-
-      role = null
-      
-    }
-  }
-  const isLoggedIn = !!(await cookies()).get('accessToken')?.value
-    const dashboardHref = role ? DASHBOARD_BY_ROLE[role] : null
+  const role = user?.role || null
+  const isLoggedIn = !!accessToken
+  const dashboardHref = role ? DASHBOARD_BY_ROLE[role] : null
 
   return (
     <header className="sticky top-0 z-50 border-b border-border/70 bg-background/95 backdrop-blur-md">
@@ -78,12 +69,21 @@ export async function Navbar() {
                   <User className="size-4" />
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
+                  {user?.name && <DropdownMenuLabel>{user.name}</DropdownMenuLabel>}
+                  {user?.name && <DropdownMenuSeparator />}
                   <DropdownMenuItem asChild>
                     <Link href="/me" className="flex items-center gap-2">
                       <User className="size-4" />
                       Profile
                     </Link>
                   </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/me#change-password" className="flex items-center gap-2">
+                      <KeyRound className="size-4" />
+                      Change Password
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
                     <form action={logoutAction} className="w-full">
                       <button className="flex w-full items-center gap-2 text-destructive">
@@ -108,7 +108,7 @@ export async function Navbar() {
           )}
         </div>
 
-        <MobileMenu isLoggedIn={isLoggedIn} />
+        <MobileMenu isLoggedIn={isLoggedIn} dashboardHref={dashboardHref} />
       </div>
 
     </header>
