@@ -1,4 +1,4 @@
-import { MeProfile } from '@/components/me-profile'
+import { MeProfile } from '@/app/(authGroup)/_components/me-profile'
 import { getMe } from '@/service/getMe'
 
 

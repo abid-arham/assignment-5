@@ -48,7 +48,7 @@ export default function Page() {
               Find vetted local professionals for the jobs that keep your home running beautifully.
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <Link href="/services" className="group inline-flex items-center justify-center gap-2 rounded-full bg-primary px-6 py-3.5 text-sm font-semibold text-primary-foreground shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
+              <Link href="/technicians" className="group inline-flex items-center justify-center gap-2 rounded-full bg-primary px-6 py-3.5 text-sm font-semibold text-primary-foreground shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
                 Find a professional <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
               </Link>
               <Link href="#how-it-works" className="inline-flex items-center justify-center rounded-full border border-border px-6 py-3.5 text-sm font-semibold transition-colors hover:bg-secondary">
